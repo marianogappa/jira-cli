@@ -27,9 +27,9 @@ function jira {
   auth = dXNlcjpwYXNz
   domain = https://yourdomain.atlassian.net
 
-  Note that the spaces are significant (I will do {print $3} with awk) and that dXNlcjpwYXNz := base64(user:pass).
-  Configuration keys are case sensitive! (e.g. don'\''t do '\''Auth = dXNlcjpwYXNz'\'')
-  The BasicAuth credentials are your Jira login credentials.
+  - Note that the spaces are significant (I will do {print $3} with awk) and that dXNlcjpwYXNz := base64(user:pass).
+  - Configuration keys are case sensitive! (e.g. don'\''t do '\''Auth = dXNlcjpwYXNz'\'')
+  - The BasicAuth credentials are your Jira login credentials.
   '
 
   if [ ! -f ~/.jiraconfig ]; then
@@ -46,6 +46,24 @@ function jira {
 
   JIRA_AUTH=$(awk '/^auth/{print $3}' ~/.jiraconfig)
   JIRA_DOMAIN=$(awk '/^domain/{print $3}' ~/.jiraconfig)
+
+  if [[ -z "$JIRA_AUTH" ]]; then
+    echo >&2
+    echo "  I found ~/.jiraconfig, but I didn't find BasicAuth credentials :(" >&2
+    echo "$NO_CONFIG_FILE" >&2
+    return 1
+  fi
+
+  if [[ -z "$JIRA_DOMAIN" ]]; then
+    echo >&2
+    echo "  I found ~/.jiraconfig, but I didn't find which domain I should request against :(" >&2
+    echo "$NO_CONFIG_FILE" >&2
+    return 1
+  fi
+
+  echo "$JIRA_AUTH"
+  echo "$JIRA_DOMAIN"
+
 
   if ! command -v "jq" >/dev/null 2>&1; then
     echo 'This command depends on jq. Please install it before using this!' >&2
@@ -108,10 +126,10 @@ function jira {
             echo "${JIRA_DOMAIN}/browse/${LINE}"
             ;;
       *)
-            A=$(tr -d ' ' <<< $LINE)
-            B=$(curl --silent -X GET -H "Authorization: Basic ${JIRA_AUTH}" -H "Content-Type: application/json" ${JIRA_DOMAIN}/rest/api/2/issue/${A})
-            C=$(jq -r ${JQ_QUERY} <<< $B)
-            echo "$C"
+            TRIM=$(tr -d ' ' <<< $LINE)
+            CURL=$(curl --silent -X GET -H "Authorization: Basic ${JIRA_AUTH}" -H "Content-Type: application/json" ${JIRA_DOMAIN}/rest/api/2/issue/${TRIM})
+            JQ=$(jq -r ${JQ_QUERY} <<< $CURL)
+            echo "$JQ"
             ;;
     esac
   done
