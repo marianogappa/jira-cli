@@ -10,6 +10,8 @@ function jira {
 
   Usage examples
 
+    jira search "validation enhancements"
+
     echo "TIS-1234" | jira info
 
     cat file_with_issue_names.txt | jira status
