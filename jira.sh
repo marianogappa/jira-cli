@@ -19,13 +19,17 @@ function jira {
     jira link <<< "TIS-1234"
 
 
-  Possible subcommands
+  Subcommands
 
     ok            checks if everything is ok, by issuing a /myself
+    search [term] search issues by search term
+
+
+  Subcommands that take newline-separated issues from STDIN
+
     info          returns basic info about an issue: number, title, asignee, status and last update date
     raw           returns the raw JSON output from the REST API response (pretty print)
     raw [jq-exp]  raw allows you to add a valid jq parsing expression
-
     link          returns e.g. -> https://company.atlassian.net/browse/TIS-1234
     title         returns e.g. -> Look for and remove all SQL injections
     issuetype     returns e.g. -> Epic
@@ -108,6 +112,35 @@ function jira {
     return 1
   fi
 
+  if [[ $COMMAND == "search" ]]; then
+    SEARCH="$2"
+
+    if [[ -z $SEARCH ]]; then
+      echo >&2
+      echo "  Usage: jira search [search_term] " >&2
+      return 1
+    fi
+
+    JQ_QUERY='.issues[]|"\(.key)\t\(.fields.summary)"'
+    TRIM=$(tr -d ' ' <<< $LINE)
+    CURL=$(curl --location --silent --request POST --header "Authorization: Basic ${JIRA_AUTH}" --header "Content-Type: application/json" ${JIRA_DOMAIN}/rest/api/2/search -d '{"jql":"text ~ \"'"${SEARCH}"'\"", "maxResults":15}')
+
+    if [[ ! $? -eq 0 ]]; then
+      echo "Curling [${JIRA_DOMAIN}/rest/api/2/search] has failed; stopping." >&2
+      return 1
+    fi
+
+    JQ=$(jq -r ${JQ_QUERY} <<< $CURL)
+
+    if [[ ! $? -eq 0 ]]; then
+      echo "Parsing the result of curling [${JIRA_DOMAIN}/rest/api/2/search] with jq query [${JQ_QUERY}] has failed; stopping." >&2
+      return 1
+    fi
+
+    echo -e "$JQ"
+    return 0
+  fi
+
   while read -r LINE
   do
     case "$COMMAND" in
@@ -162,19 +195,20 @@ function jira {
       link)
             echo "${JIRA_DOMAIN}/browse/${LINE}"
             ;;
+
       *)
             TRIM=$(tr -d ' ' <<< $LINE)
             CURL=$(curl --location --silent --request GET --header "Authorization: Basic ${JIRA_AUTH}" --header "Content-Type: application/json" ${JIRA_DOMAIN}/rest/api/2/issue/${TRIM})
 
             if [[ ! $? -eq 0 ]]; then
-              echo "Curling ${JIRA_DOMAIN}/rest/api/2/issue/${TRIM} has failed; stopping." >&2
+              echo "Curling [${JIRA_DOMAIN}/rest/api/2/issue/${TRIM}] has failed; stopping." >&2
               return 1
             fi
 
             JQ=$(jq -r ${JQ_QUERY} <<< $CURL)
 
             if [[ ! $? -eq 0 ]]; then
-              echo "Parsing the result of GETting [${JIRA_DOMAIN}/rest/api/2/issue/${TRIM}] with jq query [${JQ_QUERY}] has failed; stopping." >&2
+              echo "Parsing the result of curling [${JIRA_DOMAIN}/rest/api/2/issue/${TRIM}] with jq query [${JQ_QUERY}] has failed; stopping." >&2
               return 1
             fi
 
