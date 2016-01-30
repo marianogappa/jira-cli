@@ -9,6 +9,7 @@ function jira {
 
   Possible subcommands:
 
+      ok          returns either "OK" or e.g. "NOT OK. REST API returned [HTTP/1.1 401 Unauthorized] to a /myself GET request."
       link        returns e.g. -> https://company.atlassian.net/browse/TIS-1234
       title       returns e.g. -> Look for and remove all SQL injections
       issuetype   returns e.g. -> Epic
@@ -32,12 +33,12 @@ function jira {
   - The BasicAuth credentials are your Jira login credentials.
   '
 
-  if [ ! -f ~/.jiraconfig ]; then
+  if [[ ! -f ~/.jiraconfig ]]; then
     echo "$NO_CONFIG_FILE" >&2
     return 1
   fi
 
-  if [ $# -eq 0 ]; then
+  if [[ $# -eq 0 ]]; then
     echo "$USAGE" >&2
     return 1
   else
@@ -61,9 +62,17 @@ function jira {
     return 1
   fi
 
-  echo "$JIRA_AUTH"
-  echo "$JIRA_DOMAIN"
+  if [[ $COMMAND == "ok" ]]; then
+    CURL=$(curl --silent -LI --header "Authorization: Basic ${JIRA_AUTH}" --header "Content-Type: application/json" -XGET ${JIRA_DOMAIN}/rest/api/2/myself | head -n1 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
 
+    if [[ "$CURL" == "HTTP/1.1 200 OK" ]]; then
+      echo "OK"
+      return 0
+    else
+      echo "NOT OK. REST API returned [${CURL}] to a /myself GET request."
+      return 1
+    fi
+  fi
 
   if ! command -v "jq" >/dev/null 2>&1; then
     echo 'This command depends on jq. Please install it before using this!' >&2
@@ -85,6 +94,9 @@ function jira {
 
   while read -r LINE
   do
+    # TODO provide a raw jq query
+    # TODO provide a raw output
+    # Maybe `jira raw` gives the output and `jira raw '.fields'` processes jq queries
     case "$COMMAND" in
       link)
             ;;
@@ -116,7 +128,7 @@ function jira {
             JQ_QUERY='.fields.status.name'
             ;;
       *)
-            echo $USAGE >&2
+            echo "$USAGE" >&2
             return 1
             ;;
     esac
@@ -127,8 +139,20 @@ function jira {
             ;;
       *)
             TRIM=$(tr -d ' ' <<< $LINE)
-            CURL=$(curl --silent -X GET -H "Authorization: Basic ${JIRA_AUTH}" -H "Content-Type: application/json" ${JIRA_DOMAIN}/rest/api/2/issue/${TRIM})
+            CURL=$(curl --location --silent --request GET --header "Authorization: Basic ${JIRA_AUTH}" --header "Content-Type: application/json" ${JIRA_DOMAIN}/rest/api/2/issue/${TRIM})
+
+            if [[ ! $? -eq 0 ]]; then
+              echo "Curling ${JIRA_DOMAIN}/rest/api/2/issue/${TRIM} has failed; stopping." >&2
+              return 1
+            fi
+
             JQ=$(jq -r ${JQ_QUERY} <<< $CURL)
+
+            if [[ ! $? -eq 0 ]]; then
+              echo "Parsing the result of GETting [${JIRA_DOMAIN}/rest/api/2/issue/${TRIM}] with jq query [${JQ_QUERY}] has failed; stopping." >&2
+              return 1
+            fi
+
             echo "$JQ"
             ;;
     esac
