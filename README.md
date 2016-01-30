@@ -44,7 +44,7 @@ Lightweight bash script for easily querying your company's JIRA issues
 
 ## Setup
 
-If you dont want to read this, just source the script and run `jira`
+If you don't want to read this, just source the script and run `jira`
 
 
 1. Clone repo on your workspace `cd ~/workspace && git clone git@github.com:MarianoGappa/jira-cli.git`
@@ -104,6 +104,12 @@ Updated
 $ jira search 'billing bug' | awk '{print $1}' | jira link | xargs open
 ** hopefully 2 browser tags open with the JIRA issue pages **
 ```
+
+## Security concerns
+
+- This script is read-only: it only searches and gets info about JIRA issues
+- This script curls a REST API endpoint; if you run it a million times fast you know what may happen
+- This script uses BasicAuth over the domain you set on the config; if you configure an http domain you are sending your credentials in plain text through the interwebs. Fortunately, JIRA uses https and curl will not let you go ahead if the certs expire.
 
 ## Dependencies
 
