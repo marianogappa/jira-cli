@@ -45,10 +45,11 @@ function jira {
   NO_CONFIG_FILE='
   The Jira Rest API works with BasicAuth. Please create this file: ~/.jiraconfig and put something like this in it:
 
-  auth = dXNlcjpwYXNz
+  auth = dXNlcjpwYXNz    # == base64(user:pass)
   domain = https://yourdomain.atlassian.net
+  projects = TIS,SUP     # Optional; used to filter searches
 
-  - Note that the spaces are significant (I will do {print $3} with awk) and that dXNlcjpwYXNz := base64(user:pass).
+  - Note that the spaces are significant (I will do {print $3} with awk)
   - Configuration keys are case sensitive! (e.g. don'\''t do '\''Auth = dXNlcjpwYXNz'\'')
   - The BasicAuth credentials are your Jira login credentials.
   '
@@ -67,6 +68,7 @@ function jira {
 
   JIRA_AUTH=$(awk '/^auth/{print $3}' ~/.jiraconfig)
   JIRA_DOMAIN=$(awk '/^domain/{print $3}' ~/.jiraconfig)
+  JIRA_PROJECTS=$(awk '/^projects/{print $3}' ~/.jiraconfig)
 
   if [[ -z "$JIRA_AUTH" ]]; then
     echo >&2
@@ -121,9 +123,15 @@ function jira {
       return 1
     fi
 
+    if [[ -z $JIRA_PROJECTS ]]; then
+      PROJECT_CLAUSE=''
+    else
+      PROJECT_CLAUSE="project in (${JIRA_PROJECTS}) and "
+    fi
+
     JQ_QUERY='.issues[]|"\(.key)\t\(.fields.summary)"'
     TRIM=$(tr -d ' ' <<< $LINE)
-    CURL=$(curl --location --silent --request POST --header "Authorization: Basic ${JIRA_AUTH}" --header "Content-Type: application/json" ${JIRA_DOMAIN}/rest/api/2/search -d '{"jql":"text ~ \"'"${SEARCH}"'\"", "maxResults":15}')
+    CURL=$(curl --location --silent --request POST --header "Authorization: Basic ${JIRA_AUTH}" --header "Content-Type: application/json" ${JIRA_DOMAIN}/rest/api/2/search -d '{"jql":"'"${PROJECT_CLAUSE}"'text ~ \"'"${SEARCH}"'\"", "maxResults":15}')
 
     if [[ ! $? -eq 0 ]]; then
       echo "Curling [${JIRA_DOMAIN}/rest/api/2/search] has failed; stopping." >&2
