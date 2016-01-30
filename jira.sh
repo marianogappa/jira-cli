@@ -4,12 +4,14 @@ function jira {
   Usages:
 
     echo TIS-1234 | jira [subcommand]
-    cat file_with_ticket_names.txt | jira [subcommand]
+    cat file_with_issue_names.txt | jira [subcommand]
     jira [subcommand] <<< TIS-1234
 
   Possible subcommands:
 
       ok          returns either "OK" or e.g. "NOT OK. REST API returned [HTTP/1.1 401 Unauthorized] to a /myself GET request."
+      info        returns basic info about an issue: number, title, asignee, status and last update date
+
       link        returns e.g. -> https://company.atlassian.net/browse/TIS-1234
       title       returns e.g. -> Look for and remove all SQL injections
       issuetype   returns e.g. -> Epic
@@ -100,6 +102,9 @@ function jira {
     case "$COMMAND" in
       link)
             ;;
+      info)
+            JQ_QUERY="\"----------------------------------------\n${LINE}\n\(.fields.summary)\n\nAsignee\n\(.fields.assignee.displayName)\n\nStatus\n\(.fields.status.name)\n\nUpdated\n\(.fields.updated)\""
+            ;;
       title)
             JQ_QUERY='.fields.summary'
             ;;
@@ -153,7 +158,7 @@ function jira {
               return 1
             fi
 
-            echo "$JQ"
+            echo -e "$JQ"
             ;;
     esac
   done
