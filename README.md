@@ -9,6 +9,8 @@ Lightweight bash script for easily querying your company's JIRA issues
 
 
   Usage examples
+  
+    jira search "validation enhancements"
 
     echo "TIS-1234" | jira info
 
