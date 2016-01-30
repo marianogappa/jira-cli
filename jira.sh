@@ -1,13 +1,23 @@
 function jira {
 
   USAGE='
-  Usages:
+  Usage
 
-    echo TIS-1234 | jira [subcommand]
-    cat file_with_issue_names.txt | jira [subcommand]
-    jira [subcommand] <<< TIS-1234
+    jira [subcommand]
 
-  Possible subcommands:
+
+  Usage examples
+
+    echo "TIS-1234" | jira info
+
+    cat file_with_issue_names.txt | jira status
+
+    echo "TIS-123,TIS-456,TIS-789" | tr "," "\n" | jira title
+
+    jira link <<< "TIS-1234"
+
+
+  Possible subcommands
 
     ok            checks if everything is ok, by issuing a /myself
     info          returns basic info about an issue: number, title, asignee, status and last update date
