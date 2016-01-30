@@ -9,19 +9,21 @@ function jira {
 
   Possible subcommands:
 
-      ok          returns either "OK" or e.g. "NOT OK. REST API returned [HTTP/1.1 401 Unauthorized] to a /myself GET request."
-      info        returns basic info about an issue: number, title, asignee, status and last update date
+    ok            checks if everything is ok, by issuing a /myself
+    info          returns basic info about an issue: number, title, asignee, status and last update date
+    raw           returns the raw JSON output from the REST API response (pretty print)
+    raw [jq-exp]  raw allows you to add a valid jq parsing expression
 
-      link        returns e.g. -> https://company.atlassian.net/browse/TIS-1234
-      title       returns e.g. -> Look for and remove all SQL injections
-      issuetype   returns e.g. -> Epic
-      project     returns e.g. -> New Website
-      created     returns e.g. -> 2016-01-22T10:58:30.162+1300
-      creator     returns e.g. -> John Doe
-      reporter    returns e.g. -> John Doe
-      updated     returns e.g. -> 2016-01-22T10:58:30.162+1300
-      assignee    returns e.g. -> John Doe
-      status      returns e.g. -> Open
+    link          returns e.g. -> https://company.atlassian.net/browse/TIS-1234
+    title         returns e.g. -> Look for and remove all SQL injections
+    issuetype     returns e.g. -> Epic
+    project       returns e.g. -> New Website
+    created       returns e.g. -> 2016-01-22T10:58:30.162+1300
+    creator       returns e.g. -> John Doe
+    reporter      returns e.g. -> John Doe
+    updated       returns e.g. -> 2016-01-22T10:58:30.162+1300
+    assignee      returns e.g. -> John Doe
+    status        returns e.g. -> Open
   '
 
   NO_CONFIG_FILE='
@@ -96,14 +98,20 @@ function jira {
 
   while read -r LINE
   do
-    # TODO provide a raw jq query
-    # TODO provide a raw output
-    # Maybe `jira raw` gives the output and `jira raw '.fields'` processes jq queries
     case "$COMMAND" in
       link)
             ;;
       info)
             JQ_QUERY="\"----------------------------------------\n${LINE}\n\(.fields.summary)\n\nAsignee\n\(.fields.assignee.displayName)\n\nStatus\n\(.fields.status.name)\n\nUpdated\n\(.fields.updated)\""
+            ;;
+      raw)
+            CUSTOM_JQ_QUERY="$2"
+
+            if [[ ! -z $CUSTOM_JQ_QUERY ]]; then
+              JQ_QUERY="${CUSTOM_JQ_QUERY}"
+            else
+              JQ_QUERY="."
+            fi
             ;;
       title)
             JQ_QUERY='.fields.summary'
