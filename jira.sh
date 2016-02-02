@@ -12,13 +12,13 @@ function jira {
 
     jira search "validation enhancements"
 
-    echo "TIS-1234" | jira info
+    echo "ABC-1234" | jira info
 
     cat file_with_issue_names.txt | jira status
 
-    echo "TIS-123,TIS-456,TIS-789" | tr "," "\n" | jira title
+    echo "ABC-123,ABC-456,ABC-789" | tr "," "\n" | jira title
 
-    jira link <<< "TIS-1234"
+    jira link <<< "ABC-1234"
 
 
   Subcommands
@@ -32,7 +32,7 @@ function jira {
     info          returns basic info about an issue: number, title, asignee, status and last update date
     raw           returns the raw JSON output from the REST API response (pretty print)
     raw [jq-exp]  raw allows you to add a valid jq parsing expression
-    link          returns e.g. -> https://company.atlassian.net/browse/TIS-1234
+    link          returns e.g. -> https://company.atlassian.net/browse/ABC-1234
     title         returns e.g. -> Look for and remove all SQL injections
     issuetype     returns e.g. -> Epic
     project       returns e.g. -> New Website
@@ -49,7 +49,7 @@ function jira {
 
   auth = dXNlcjpwYXNz    # == base64(user:pass)
   domain = https://yourdomain.atlassian.net
-  projects = TIS,SUP     # Optional; used to filter searches
+  projects = ABC,DEF     # Optional; used to filter searches
 
   - Note that the spaces are significant (I will do {print $3} with awk)
   - Configuration keys are case sensitive! (e.g. don'\''t do '\''Auth = dXNlcjpwYXNz'\'')

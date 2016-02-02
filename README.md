@@ -12,13 +12,13 @@ Lightweight bash script for easily querying your company's JIRA issues
   
     jira search "validation enhancements"
 
-    echo "TIS-1234" | jira info
+    echo "ABC-1234" | jira info
 
     cat file_with_issue_names.txt | jira status
 
-    echo "TIS-123,TIS-456,TIS-789" | tr "," "\n" | jira title
+    echo "ABC-123,ABC-456,ABC-789" | tr "," "\n" | jira title
 
-    jira link <<< "TIS-1234"
+    jira link <<< "ABC-1234"
 
 
   Subcommands
@@ -32,7 +32,7 @@ Lightweight bash script for easily querying your company's JIRA issues
     info          returns basic info about an issue: number, title, asignee, status and last update date
     raw           returns the raw JSON output from the REST API response (pretty print)
     raw [jq-exp]  raw allows you to add a valid jq parsing expression
-    link          returns e.g. -> https://company.atlassian.net/browse/TIS-1234
+    link          returns e.g. -> https://company.atlassian.net/browse/ABC-1234
     title         returns e.g. -> Look for and remove all SQL injections
     issuetype     returns e.g. -> Epic
     project       returns e.g. -> New Website
@@ -55,7 +55,7 @@ If you don't want to read this, just source the script and run `jira`
 ```
   auth = dXNlcjpwYXNz    # == base64(user:pass)
   domain = https://yourdomain.atlassian.net
-  projects = TIS,SUP     # Optional; used to filter searches
+  projects = ABC,DEF     # Optional; used to filter searches
 ```
   - Note that the spaces are significant (I will do `{print $3}` with `awk`)
   - Configuration keys are case sensitive! (e.g. don't do `Auth = dXNlcjpwYXNz`)
@@ -70,14 +70,14 @@ If you get `HTTP/1.1 401 Unautorized`, your BasicAuth base64 code might be wrong
 - Search for issues about a billing bug
 ```
 $ jira search 'billing bug'
-SUP-1234  Billing doesn't process properly when it rains
-SUP-5678  Problem with printing billing reports
+DEF-1234  Billing doesn't process properly when it rains
+DEF-5678  Problem with printing billing reports
 ```
 - Get just the ticket numbers
 ```
 $ jira search 'billing bug' | awk '{print $1}'
-SUP-1234
-SUP-5678
+DEF-1234
+DEF-5678
 ```
 - See if they are closed already or you should still worry
 ```
@@ -87,9 +87,9 @@ Closed
 ```
 - Mmm; the first one is still open. A little more info would be interesting
 ```
-$ jira info <<< SUP-1234
+$ jira info <<< DEF-1234
 ----------------------------------------
-SUP-1234
+DEF-1234
 Billing doesn't process properly when it rains
 
 Asignee
