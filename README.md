@@ -1,49 +1,6 @@
 # Jira CLI
 Lightweight bash script for easily querying your company's JIRA issues
 
-## Usage
-```
-  Usage
-
-    jira [subcommand]
-
-
-  Usage examples
-
-    jira search "validation enhancements"
-
-    echo "ABC-1234" | jira info
-
-    cat file_with_issue_names.txt | jira status
-
-    echo "ABC-123,ABC-456,ABC-789" | tr "," "\n" | jira title
-
-    jira link <<< "ABC-1234"
-
-
-  Subcommands
-
-    ok            checks if everything is ok, by issuing a /myself
-    search [term] search issues by search term
-
-
-  Subcommands that take newline-separated issues from STDIN
-
-    info          returns basic info about an issue: number, title, asignee, status and last update date
-    raw           returns the raw JSON output from the REST API response (pretty print)
-    raw [jq-exp]  raw allows you to add a valid jq parsing expression
-    link          returns e.g. -> https://company.atlassian.net/browse/ABC-1234
-    title         returns e.g. -> Look for and remove all SQL injections
-    issuetype     returns e.g. -> Epic
-    project       returns e.g. -> New Website
-    created       returns e.g. -> 2016-01-22T10:58:30.162+1300
-    creator       returns e.g. -> John Doe
-    reporter      returns e.g. -> John Doe
-    updated       returns e.g. -> 2016-01-22T10:58:30.162+1300
-    assignee      returns e.g. -> John Doe
-    status        returns e.g. -> Open
-```
-
 ## Setup
 
 ```
@@ -95,6 +52,10 @@ Updated
 ```
 $ jira search 'billing bug' | awk '{print $1}' | jira link | xargs open
 ** hopefully 2 browser tags open with the JIRA issue pages **
+```
+- For more subcommand options just run:
+```
+jira
 ```
 
 ## Security concerns
