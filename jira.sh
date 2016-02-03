@@ -44,20 +44,59 @@ function jira {
     status        returns e.g. -> Open
   '
 
-  NO_CONFIG_FILE='
-  The Jira Rest API works with BasicAuth. Please create this file: ~/.jiraconfig and put something like this in it:
-
-  auth = dXNlcjpwYXNz    # == base64(user:pass)
-  domain = https://yourdomain.atlassian.net
-  projects = ABC,DEF     # Optional; used to filter searches
-
-  - Note that the spaces are significant (I will do {print $3} with awk)
-  - Configuration keys are case sensitive! (e.g. don'\''t do '\''Auth = dXNlcjpwYXNz'\'')
-  - The BasicAuth credentials are your Jira login credentials.
-  '
-
   if [[ ! -f ~/.jiraconfig ]]; then
-    echo "$NO_CONFIG_FILE" >&2
+		cat <<- 'EOF' > ~/.jiraconfig
+		# Please modify the following configuration values in order to be able to
+		# use jira-cli properly!
+
+
+		# auth holds your BasicAuth credentials; it should be:
+		#
+		# base64_encode(your_jira_username:your_jira_password)
+		# IMPORTANT: don't use your EMAIL, use your USERNAME
+		#
+		# e.g. if your username is 'user' and your password is 'pass', then:
+		#
+		# base64_encode("user:pass") = dXNlcjpwYXNz
+		#
+		# so:
+		#
+		# auth = dXNlcjpwYXNz
+		#
+		auth = dXNlcjpwYXNz
+
+
+		# domain should be the same url domain as the one you see in the location bar
+		# of your browser when browsing a Jira issue
+		#
+		# e.g. if a browser tab showing a Jira issue shows the following url:
+		#
+		# https://abccompany.atlassian.net/browse/ABC-1234
+		#
+		# then:
+		#
+		# domain = https://abccompany.atlassian.net
+		#
+		domain = https://yourdomain.atlassian.net
+
+
+		# projects is optional. In large organizations, Jira holds many projects;
+		# chances are when you are searching for an issue you will want to look around
+		# in only a few of those projects.
+		#
+		# e.g. if you only want to search in the ABC and DEF projects
+		#
+		# projects = ABC,DEF
+		#
+		# Note that ABC is the prefix on the issue code, e.g.
+		# https://abccompany.atlassian.net/browse/ABC-1234
+		#
+		# If you don't want to use this feature, please comment it out
+		#
+		projects = ABC,DEF
+		EOF
+
+    ${EDITOR:-${VISUAL:-vi}} ~/.jiraconfig
     return 1
   fi
 
@@ -116,7 +155,7 @@ function jira {
     return 1
   fi
 
-  if [[ $COMMAND == "search" ]]; then
+  if [[ $COMMAND == "search" ]] || [[ $COMMAND == "s" ]]; then
     SEARCH="$2"
 
     if [[ -z $SEARCH ]]; then
@@ -154,12 +193,12 @@ function jira {
   while read -r LINE
   do
     case "$COMMAND" in
-      link)
+      link|l)
             ;;
-      info)
+      info|i)
             JQ_QUERY="\"----------------------------------------\n${LINE}\n\(.fields.summary)\n\nAsignee\n\(.fields.assignee.displayName)\n\nStatus\n\(.fields.status.name)\n\nUpdated\n\(.fields.updated)\""
             ;;
-      raw)
+      raw|r)
             CUSTOM_JQ_QUERY="$2"
 
             if [[ ! -z $CUSTOM_JQ_QUERY ]]; then
@@ -168,13 +207,13 @@ function jira {
               JQ_QUERY="."
             fi
             ;;
-      title)
+      title|t)
             JQ_QUERY='.fields.summary'
             ;;
       issuetype)
             JQ_QUERY='.fields.issuetype.name'
             ;;
-      project)
+      project|p)
             JQ_QUERY='.fields.project.name'
             ;;
       created)
@@ -189,10 +228,10 @@ function jira {
       updated)
             JQ_QUERY='.fields.updated'
             ;;
-      assignee)
+      assignee|a)
             JQ_QUERY='.fields.assignee.displayName'
             ;;
-      status)
+      status|st)
             JQ_QUERY='.fields.status.name'
             ;;
       *)
@@ -202,7 +241,7 @@ function jira {
     esac
 
     case "$COMMAND" in
-      link)
+      link|l)
             echo "${JIRA_DOMAIN}/browse/${LINE}"
             ;;
 

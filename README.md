@@ -9,7 +9,7 @@ Lightweight bash script for easily querying your company's JIRA issues
 
 
   Usage examples
-  
+
     jira search "validation enhancements"
 
     echo "ABC-1234" | jira info
@@ -46,24 +46,14 @@ Lightweight bash script for easily querying your company's JIRA issues
 
 ## Setup
 
-If you don't want to read this, just source the script and run `jira`
-
-
-1. Clone repo on your workspace `cd ~/workspace && git clone git@github.com:MarianoGappa/jira-cli.git`
-2. Source the script `printf '%s' 'source ~/workspace/jira-cli/jira.sh' >> ~/.bashrc`
-3. Create a `.jiraconfig` on your home folder `vi ~/.jiraconfig` and add:
 ```
-  auth = dXNlcjpwYXNz    # == base64(user:pass)
-  domain = https://yourdomain.atlassian.net
-  projects = ABC,DEF     # Optional; used to filter searches
+$ cd ~/workspace && git clone git@github.com:MarianoGappa/jira-cli.git
+$ printf '%s' 'source ~/workspace/jira-cli/jira.sh' >> ~/.bashrc
+$ jira ok
 ```
-  - Note that the spaces are significant (I will do `{print $3}` with `awk`)
-  - Configuration keys are case sensitive! (e.g. don't do `Auth = dXNlcjpwYXNz`)
-  - The BasicAuth credentials are your Jira login credentials
 
-Done! Check that everything works by running `jira ok`
-
-If you get `HTTP/1.1 401 Unautorized`, your BasicAuth base64 code might be wrong or you may not have access to that account.
+- The first time you run it, a config file will be created and opened for you to edit the minimal things to make it work
+- If you get `HTTP/1.1 401 Unautorized`, your BasicAuth base64 code might be wrong or you may not have access to that account. Did you use your email instead of your username?
 
 ## Use case examples
 
