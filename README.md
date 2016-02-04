@@ -20,24 +20,17 @@ $ jira search 'billing bug'
 DEF-1234  Billing doesn't process properly when it rains
 DEF-5678  Problem with printing billing reports
 ```
-- Get just the ticket numbers
-```
-$ jira search 'billing bug' | awk '{print $1}'
-DEF-1234
-DEF-5678
-```
 - See if they are closed already or you should still worry
 ```
-$ jira search 'billing bug' | awk '{print $1}' | jira status
-Open
-Closed
+$ jira search 'billing bug' | jira status
+DEF-1234  Closed
+DEF-5678  Open
 ```
-- Mmm; the first one is still open. A little more info would be interesting
+- Mmm; the second one is still open. A little more info would be interesting
 ```
-$ jira info <<< DEF-1234
-----------------------------------------
-DEF-1234
-Billing doesn't process properly when it rains
+$ jira search 'billing bug' | jira info 2
+DEF-5678
+The printer is broken like in Office Space (paper jam but no paper jam)
 
 Asignee
 John NewGuy
@@ -47,15 +40,24 @@ Open
 
 Updated
 2015-12-09T17:27:00.525+1300
+----------------------------------------
 ```
-- New guy? Last updated a year ago? Looks like it's time to worry; open both of them in the browser
+- New guy? Last updated a year ago? Looks like it's time to worry; open the second one on the browser
 ```
-$ jira search 'billing bug' | awk '{print $1}' | jira link | xargs open
-** hopefully 2 browser tags open with the JIRA issue pages **
+$ jira search 'billing bug' | jira open 2
+** hopefully a browser tag opens with the JIRA issue page **
 ```
 - For more subcommand options just run:
 ```
 jira
+```
+
+## Uninstalling
+
+```
+rm ~/.jiraconfig
+rm -rf ~/workspace/jira-cli
+# and remove source line on ~/.bashrc
 ```
 
 ## Security concerns
