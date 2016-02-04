@@ -190,8 +190,10 @@ function jira {
     return 0
   fi
 
+  I=0
   while read -r LINE
   do
+    I=$((I+1))
     LINE=$(awk '{print $1}' <<< $LINE)
 
     case "$COMMAND" in
@@ -248,6 +250,8 @@ function jira {
             ;;
 
       open|o)
+            NUMBER=$2
+
             case "$(uname)" in
               Darwin)
                 OPEN=open
@@ -257,7 +261,9 @@ function jira {
                 ;;
             esac
 
-            ${OPEN} "${JIRA_DOMAIN}/browse/${LINE}"
+            if [[ -z $NUMBER ]] || [[ $NUMBER -eq $I ]]; then
+              ${OPEN} "${JIRA_DOMAIN}/browse/${LINE}"
+            fi
             ;;
 
       *)
