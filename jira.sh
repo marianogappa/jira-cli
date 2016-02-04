@@ -192,11 +192,13 @@ function jira {
 
   while read -r LINE
   do
+    LINE=$(awk '{print $1}' <<< $LINE)
+
     case "$COMMAND" in
       link|l)
             ;;
       info|i)
-            JQ_QUERY="\"----------------------------------------\n${LINE}\n\(.fields.summary)\n\nAsignee\n\(.fields.assignee.displayName)\n\nStatus\n\(.fields.status.name)\n\nUpdated\n\(.fields.updated)\""
+            JQ_QUERY="\"\n\(.fields.summary)\n\nAsignee\n\(.fields.assignee.displayName)\n\nStatus\n\(.fields.status.name)\n\nUpdated\n\(.fields.updated)\n----------------------------------------\""
             ;;
       raw|r)
             CUSTOM_JQ_QUERY="$2"
@@ -261,7 +263,7 @@ function jira {
               return 1
             fi
 
-            echo -e "$JQ"
+            echo -e "$LINE\t$JQ"
             ;;
     esac
   done
