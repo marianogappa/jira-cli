@@ -29,25 +29,25 @@ function jira {
     \033[1;37msearch|s\033[0m [term]    search issues by search term
 
 
-  \033[1;37mSubcommands that take \\n-separated issues from STDIN
+  \033[1;37mSubcommands that take \\n-separated issues from STDIN\033[0m
+  (all these accept an integer e.g. "jira open 2" to filter STDIN to just the ith line)
 
     \033[1;37mopen|o\033[0m          open an issue on your web browser
-    \033[1;37mopen|o\033[0m [i]      optionally, add which issue to open if many lines (starting from 1)
     \033[1;37minfo|i\033[0m          basic info about an issue
     \033[1;37mraw\033[0m             pretty print raw JSON /issue output
 
-    \033[1;37mlink|l\033[0m          e.g. -> ABC-123   https://company.atlassian.net/browse/ABC-1234
-    \033[1;37mtitle|t\033[0m         e.g. -> ABC-123   Look for and remove all SQL injections
-    \033[1;37missuetype\033[0m       e.g. -> ABC-123   Epic
-    \033[1;37mproject\033[0m         e.g. -> ABC-123   New Website
-    \033[1;37mstatus|st\033[0m       e.g. -> ABC-123   Open
+    \033[1;37mlink|l\033[0m          e.g. \033[1;37m->\033[0m \033[1;32mABC-123   https://company.atlassian.net/browse/ABC-1234\033[0m
+    \033[1;37mtitle|t\033[0m         e.g. \033[1;37m->\033[0m \033[1;32mABC-123   Look for and remove all SQL injections\033[0m
+    \033[1;37missuetype\033[0m       e.g. \033[1;37m->\033[0m \033[1;32mABC-123   Epic\033[0m
+    \033[1;37mproject\033[0m         e.g. \033[1;37m->\033[0m \033[1;32mABC-123   New Website\033[0m
+    \033[1;37mstatus|st\033[0m       e.g. \033[1;37m->\033[0m \033[1;32mABC-123   Open\033[0m
 
-    \033[1;37mcreated\033[0m         e.g. -> ABC-123   2016-01-22T10:58:30.162+1300
-    \033[1;37mupdated\033[0m         e.g. -> ABC-123   2016-01-22T10:58:30.162+1300
+    \033[1;37mcreated\033[0m         e.g. \033[1;37m->\033[0m \033[1;32mABC-123   2016-01-22T10:58:30.162+1300\033[0m
+    \033[1;37mupdated\033[0m         e.g. \033[1;37m->\033[0m \033[1;32mABC-123   2016-01-22T10:58:30.162+1300\033[0m
 
-    \033[1;37mcreator\033[0m         e.g. -> ABC-123   John Doe
-    \033[1;37mreporter\033[0m        e.g. -> ABC-123   John Doe
-    \033[1;37massignee|a\033[0m      e.g. -> ABC-123   John Doe
+    \033[1;37mcreator\033[0m         e.g. \033[1;37m->\033[0m \033[1;32mABC-123   John Doe\033[0m
+    \033[1;37mreporter\033[0m        e.g. \033[1;37m->\033[0m \033[1;32mABC-123   John Doe\033[0m
+    \033[1;37massignee|a\033[0m      e.g. \033[1;37m->\033[0m \033[1;32mABC-123   John Doe\033[0m
   ')
 
   if [[ ! -f ~/.jiraconfig ]]; then
