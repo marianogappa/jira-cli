@@ -12,7 +12,7 @@ function jira {
 
     \033[1;37mjira search\033[0m "validation enhancements"
 
-    \033[1;37mjira search\033[0m "validation enhancements" | \033[1;37mjira open\033[0m 3
+    \033[1;37mjira s\033[0m "validation enhancements" | \033[1;37mjira open\033[0m 3
 
     \033[1;37mjira info\033[0m <<< "ABC-1234"
 
