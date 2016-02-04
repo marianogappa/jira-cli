@@ -35,7 +35,6 @@ function jira {
     \033[1;37mopen|o\033[0m [i]      optionally, add which issue to open if many lines (starting from 1)
     \033[1;37minfo|i\033[0m          basic info about an issue
     \033[1;37mraw\033[0m             pretty print raw JSON /issue output
-    \033[1;37mraw\033[0m [jq-exp]    raw allows you to add a valid jq parsing expression
 
     \033[1;37mlink|l\033[0m          e.g. -> ABC-123   https://company.atlassian.net/browse/ABC-1234
     \033[1;37mtitle|t\033[0m         e.g. -> ABC-123   Look for and remove all SQL injections
@@ -213,13 +212,7 @@ function jira {
               JQ_QUERY="\"\n\(.fields.summary)\n\nAsignee\n\(.fields.assignee.displayName)\n\nStatus\n\(.fields.status.name)\n\nUpdated\n\(.fields.updated)\n----------------------------------------\""
               ;;
         raw|r)
-              CUSTOM_JQ_QUERY="$2"
-
-              if [[ ! -z $CUSTOM_JQ_QUERY ]]; then
-                JQ_QUERY="${CUSTOM_JQ_QUERY}"
-              else
-                JQ_QUERY="."
-              fi
+              JQ_QUERY="."
               ;;
         title|t)
               JQ_QUERY='.fields.summary'
