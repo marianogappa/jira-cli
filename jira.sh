@@ -201,100 +201,101 @@ function jira {
   while read -r LINE
   do
     I=$((I+1))
-    LINE=$(awk '{print $1}' <<< $LINE)
+    NUMBER=$2
 
-    case "$COMMAND" in
-      link|l|open|o)
-            ;;
-      info|i)
-            JQ_QUERY="\"\n\(.fields.summary)\n\nAsignee\n\(.fields.assignee.displayName)\n\nStatus\n\(.fields.status.name)\n\nUpdated\n\(.fields.updated)\n----------------------------------------\""
-            ;;
-      raw|r)
-            CUSTOM_JQ_QUERY="$2"
+    if [[ -z $NUMBER ]] || [[ $NUMBER -eq $I ]]; then
+      LINE=$(awk '{print $1}' <<< $LINE)
 
-            if [[ ! -z $CUSTOM_JQ_QUERY ]]; then
-              JQ_QUERY="${CUSTOM_JQ_QUERY}"
-            else
-              JQ_QUERY="."
-            fi
-            ;;
-      title|t)
-            JQ_QUERY='.fields.summary'
-            ;;
-      issuetype)
-            JQ_QUERY='.fields.issuetype.name'
-            ;;
-      project|p)
-            JQ_QUERY='.fields.project.name'
-            ;;
-      created)
-            JQ_QUERY='.fields.created'
-            ;;
-      creator)
-            JQ_QUERY='.fields.creator.displayName'
-            ;;
-      reporter)
-            JQ_QUERY='.fields.reporter.displayName'
-            ;;
-      updated)
-            JQ_QUERY='.fields.updated'
-            ;;
-      assignee|a)
-            JQ_QUERY='.fields.assignee.displayName'
-            ;;
-      status|st)
-            JQ_QUERY='.fields.status.name'
-            ;;
-      *)
-            echo "$USAGE" >&2
-            return 1
-            ;;
-    esac
+      case "$COMMAND" in
+        link|l|open|o)
+              ;;
+        info|i)
+              JQ_QUERY="\"\n\(.fields.summary)\n\nAsignee\n\(.fields.assignee.displayName)\n\nStatus\n\(.fields.status.name)\n\nUpdated\n\(.fields.updated)\n----------------------------------------\""
+              ;;
+        raw|r)
+              CUSTOM_JQ_QUERY="$2"
 
-    case "$COMMAND" in
-      link|l)
-            echo "${JIRA_DOMAIN}/browse/${LINE}"
-            ;;
+              if [[ ! -z $CUSTOM_JQ_QUERY ]]; then
+                JQ_QUERY="${CUSTOM_JQ_QUERY}"
+              else
+                JQ_QUERY="."
+              fi
+              ;;
+        title|t)
+              JQ_QUERY='.fields.summary'
+              ;;
+        issuetype)
+              JQ_QUERY='.fields.issuetype.name'
+              ;;
+        project|p)
+              JQ_QUERY='.fields.project.name'
+              ;;
+        created)
+              JQ_QUERY='.fields.created'
+              ;;
+        creator)
+              JQ_QUERY='.fields.creator.displayName'
+              ;;
+        reporter)
+              JQ_QUERY='.fields.reporter.displayName'
+              ;;
+        updated)
+              JQ_QUERY='.fields.updated'
+              ;;
+        assignee|a)
+              JQ_QUERY='.fields.assignee.displayName'
+              ;;
+        status|st)
+              JQ_QUERY='.fields.status.name'
+              ;;
+        *)
+              echo "$USAGE" >&2
+              return 1
+              ;;
+      esac
 
-      open|o)
-            NUMBER=$2
+      case "$COMMAND" in
+        link|l)
+              echo "${JIRA_DOMAIN}/browse/${LINE}"
+              ;;
 
-            case "$(uname)" in
-              Darwin)
-                OPEN=open
-                ;;
-              *)
-                OPEN=xdg-open
-                ;;
-            esac
+        open|o)
+              case "$(uname)" in
+                Darwin)
+                  OPEN=open
+                  ;;
+                *)
+                  OPEN=xdg-open
+                  ;;
+              esac
 
-            if [[ -z $NUMBER ]] || [[ $NUMBER -eq $I ]]; then
               ${OPEN} "${JIRA_DOMAIN}/browse/${LINE}"
-            fi
-            ;;
+              ;;
 
-      *)
-            TRIM=$(tr -d ' ' <<< $LINE)
-            CURL=$(curl --location --silent --request GET --header "Authorization: Basic ${JIRA_AUTH}" --header "Content-Type: application/json" ${JIRA_DOMAIN}/rest/api/2/issue/${TRIM})
+        *)
+              TRIM=$(tr -d ' ' <<< $LINE)
+              CURL=$(curl --location --silent --request GET --header "Authorization: Basic ${JIRA_AUTH}" --header "Content-Type: application/json" ${JIRA_DOMAIN}/rest/api/2/issue/${TRIM})
 
-            if [[ ! $? -eq 0 ]]; then
-              echo "Curling [${JIRA_DOMAIN}/rest/api/2/issue/${TRIM}] has failed; stopping." >&2
-              return 1
-            fi
+              if [[ ! $? -eq 0 ]]; then
+                echo "Curling [${JIRA_DOMAIN}/rest/api/2/issue/${TRIM}] has failed; stopping." >&2
+                return 1
+              fi
 
-            JQ=$(jq -r ${JQ_QUERY} <<< $CURL)
+              JQ=$(jq -r ${JQ_QUERY} <<< $CURL)
 
-            if [[ ! $? -eq 0 ]]; then
-              echo "Parsing the result of curling [${JIRA_DOMAIN}/rest/api/2/issue/${TRIM}] with jq query [${JQ_QUERY}] has failed; stopping." >&2
-              return 1
-            fi
+              if [[ ! $? -eq 0 ]]; then
+                echo "Parsing the result of curling [${JIRA_DOMAIN}/rest/api/2/issue/${TRIM}] with jq query [${JQ_QUERY}] has failed; stopping." >&2
+                return 1
+              fi
 
-            if [[ $COMMAND == "raw" ]] || [[ $COMMAND == "r" ]] ; then
-              echo -e "$JQ"
-            else
-              echo -e "$LINE\t$JQ"
-            fi
-            ;;
-    esac
+              if [[ $COMMAND == "raw" ]] || [[ $COMMAND == "r" ]] ; then
+                echo -e "$JQ"
+              else
+                echo -e "$LINE\t$JQ"
+              fi
+              ;;
+      esac
+
+    fi
   done
 }
