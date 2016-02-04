@@ -289,7 +289,11 @@ function jira {
               return 1
             fi
 
-            echo -e "$LINE\t$JQ"
+            if [[ $COMMAND == "raw" ]] || [[ $COMMAND == "r" ]] ; then
+              echo -e "$JQ"
+            else
+              echo -e "$LINE\t$JQ"
+            fi
             ;;
     esac
   done
