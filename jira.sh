@@ -2,47 +2,54 @@
 
 function jira {
 
-  USAGE='
-  Usage
+  USAGE=$(echo -e '
+  \033[1;37mUsage\033[0m
 
-    jira [subcommand]
-
-
-  Usage examples
-
-    jira search "validation enhancements"
-
-    echo "ABC-1234" | jira info
-
-    cat file_with_issue_names.txt | jira status
-
-    echo "ABC-123,ABC-456,ABC-789" | tr "," "\n" | jira title
-
-    jira link <<< "ABC-1234"
+    \033[1;37mjira\033[0m [subcommand]
 
 
-  Subcommands
+  \033[1;37mUsage examples\033[0m
 
-    ok            checks if everything is ok, by issuing a /myself
-    search [term] search issues by search term
+    \033[1;37mjira search\033[0m "validation enhancements"
+
+    \033[1;37mjira search\033[0m "validation enhancements" | \033[1;37mjira open\033[0m 3
+
+    \033[1;37mjira info\033[0m <<< "ABC-1234"
+
+    cat file_with_issue_names.txt | \033[1;37mjira status\033[0m
+
+    echo "ABC-123,ABC-456,ABC-789" | tr "," "\\n" | \033[1;37mjira title\033[0m
+
+    echo "ABC-123" | \033[1;37mjira raw\033[0m | grep "John Doe"
 
 
-  Subcommands that take newline-separated issues from STDIN
+  \033[1;37mSubcommands\033[0m
 
-    info          returns basic info about an issue: number, title, asignee, status and last update date
-    raw           returns the raw JSON output from the REST API response (pretty print)
-    raw [jq-exp]  raw allows you to add a valid jq parsing expression
-    link          returns e.g. -> https://company.atlassian.net/browse/ABC-1234
-    title         returns e.g. -> Look for and remove all SQL injections
-    issuetype     returns e.g. -> Epic
-    project       returns e.g. -> New Website
-    created       returns e.g. -> 2016-01-22T10:58:30.162+1300
-    creator       returns e.g. -> John Doe
-    reporter      returns e.g. -> John Doe
-    updated       returns e.g. -> 2016-01-22T10:58:30.162+1300
-    assignee      returns e.g. -> John Doe
-    status        returns e.g. -> Open
-  '
+    \033[1;37mok\033[0m                 checks if everything is ok, by issuing a /myself
+    \033[1;37msearch|s\033[0m [term]    search issues by search term
+
+
+  \033[1;37mSubcommands that take \\n-separated issues from STDIN
+
+    \033[1;37mopen|o\033[0m          open an issue on your web browser
+    \033[1;37mopen|o\033[0m [i]      optionally, add which issue to open if many lines (starting from 1)
+    \033[1;37minfo|i\033[0m          basic info about an issue
+    \033[1;37mraw\033[0m             pretty print raw JSON /issue output
+    \033[1;37mraw\033[0m [jq-exp]    raw allows you to add a valid jq parsing expression
+
+    \033[1;37mlink|l\033[0m          e.g. -> ABC-123   https://company.atlassian.net/browse/ABC-1234
+    \033[1;37mtitle|t\033[0m         e.g. -> ABC-123   Look for and remove all SQL injections
+    \033[1;37missuetype\033[0m       e.g. -> ABC-123   Epic
+    \033[1;37mproject\033[0m         e.g. -> ABC-123   New Website
+    \033[1;37mstatus|st\033[0m       e.g. -> ABC-123   Open
+
+    \033[1;37mcreated\033[0m         e.g. -> ABC-123   2016-01-22T10:58:30.162+1300
+    \033[1;37mupdated\033[0m         e.g. -> ABC-123   2016-01-22T10:58:30.162+1300
+
+    \033[1;37mcreator\033[0m         e.g. -> ABC-123   John Doe
+    \033[1;37mreporter\033[0m        e.g. -> ABC-123   John Doe
+    \033[1;37massignee|a\033[0m      e.g. -> ABC-123   John Doe
+  ')
 
   if [[ ! -f ~/.jiraconfig ]]; then
 		cat <<- 'EOF' > ~/.jiraconfig
