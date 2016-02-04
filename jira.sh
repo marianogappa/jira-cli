@@ -195,7 +195,7 @@ function jira {
     LINE=$(awk '{print $1}' <<< $LINE)
 
     case "$COMMAND" in
-      link|l)
+      link|l|open|o)
             ;;
       info|i)
             JQ_QUERY="\"\n\(.fields.summary)\n\nAsignee\n\(.fields.assignee.displayName)\n\nStatus\n\(.fields.status.name)\n\nUpdated\n\(.fields.updated)\n----------------------------------------\""
@@ -245,6 +245,19 @@ function jira {
     case "$COMMAND" in
       link|l)
             echo "${JIRA_DOMAIN}/browse/${LINE}"
+            ;;
+
+      open|o)
+            case "$(uname)" in
+              Darwin)
+                OPEN=open
+                ;;
+              *)
+                OPEN=xdg-open
+                ;;
+            esac
+
+            ${OPEN} "${JIRA_DOMAIN}/browse/${LINE}"
             ;;
 
       *)
