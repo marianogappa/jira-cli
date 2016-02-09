@@ -4,9 +4,11 @@ Lightweight bash script for easily querying your company's JIRA issues
 ## Setup
 
 ```
-$ cd ~/workspace && git clone git@github.com:MarianoGappa/jira-cli.git
-$ printf '%s' 'source ~/workspace/jira-cli/jira.sh' >> ~/.bashrc
-$ jira ok
+cd ~/workspace && git clone git@github.com:MarianoGappa/jira-cli.git
+echo 'source ~/workspace/jira-cli/jira.sh' >> ~/.bashrc
+jira ok
+[...]
+source ~/.bashrc
 ```
 
 - The first time you run it, a config file will be created and opened for you to edit the minimal things to make it work
