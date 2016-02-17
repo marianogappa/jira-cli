@@ -53,6 +53,11 @@ $ jira search 'billing bug' | jira open 2
 jira
 ```
 
+## Updating
+```
+cd ~/workspace/jira-cli && git pull
+```
+
 ## Uninstalling
 
 ```
