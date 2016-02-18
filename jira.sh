@@ -14,6 +14,8 @@ function jira {
 
     \033[1;37mjira s\033[0m "validation enhancements" | \033[1;37mjira open\033[0m 3
 
+    \033[1;37mjira me\033[0m | \033[1;37mjira o\033[0m
+
     \033[1;37mjira info\033[0m <<< "ABC-1234"
 
     cat file_with_issue_names.txt | \033[1;37mjira status\033[0m
@@ -27,6 +29,7 @@ function jira {
 
     \033[1;37mok\033[0m                 checks if everything is ok, by issuing a /myself
     \033[1;37msearch|s\033[0m [term]    search issues by search term
+    \033[1;37mme|m\033[0m               search last updated open issues assigned to me
 
 
   \033[1;37mSubcommands that take \\n-separated issues from STDIN\033[0m
@@ -97,9 +100,23 @@ function jira {
 		# Note that ABC is the prefix on the issue code, e.g.
 		# https://abccompany.atlassian.net/browse/ABC-1234
 		#
-		# If you don't want to use this feature, please comment it out
+		# If you want to use this feature, please uncomment it:
 		#
-		projects = ABC,DEF
+		#projects = ABC,DEF
+
+
+		# The 'jira me' command lists the top 15 issues that are of interest to you.
+		#
+		# By default, it will yield the top 15 last updated issues that are assigned
+		# to you and are still open. You are welcome to replace this functionality
+		# with your own customised JQL script, but note that you must escape double
+		# quotes.
+		#
+		# Default value:
+		#
+		# me-filter = 'assignee = currentUser() AND status in (Open, \"To Do\", \"In Progress\", Reopened) ORDER BY updated DESC'
+		#
+		me-filter = "assignee = currentUser() AND status in (Open, \"To Do\", \"In Progress\", Reopened) ORDER BY updated DESC"
 		EOF
 
     ${EDITOR:-${VISUAL:-vi}} ~/.jiraconfig
@@ -116,6 +133,7 @@ function jira {
   JIRA_AUTH=$(awk '/^auth/{print $3}' ~/.jiraconfig)
   JIRA_DOMAIN=$(awk '/^domain/{print $3}' ~/.jiraconfig)
   JIRA_PROJECTS=$(awk '/^projects/{print $3}' ~/.jiraconfig)
+  ME_FILTER=$(grep '^me-filter = ' ~/.jiraconfig | sed 's/me-filter = "\(.*\)"/\1/')
 
   if [[ -z "$JIRA_AUTH" ]]; then
     echo >&2
@@ -179,6 +197,38 @@ function jira {
     JQ_QUERY='.issues[]|"\(.key)\t\(.fields.summary)"'
     TRIM=$(tr -d ' ' <<< $LINE)
     CURL=$(curl --location --silent --request POST --header "Authorization: Basic ${JIRA_AUTH}" --header "Content-Type: application/json" ${JIRA_DOMAIN}/rest/api/2/search -d '{"jql":"'"${PROJECT_CLAUSE}"'text ~ \"'"${SEARCH}"'\"", "maxResults":15}')
+
+    if [[ ! $? -eq 0 ]]; then
+      echo "Curling [${JIRA_DOMAIN}/rest/api/2/search] has failed; stopping." >&2
+      return 1
+    fi
+
+    JQ=$(jq -r ${JQ_QUERY} <<< $CURL)
+
+    if [[ ! $? -eq 0 ]]; then
+      echo "Parsing the result of curling [${JIRA_DOMAIN}/rest/api/2/search] with jq query [${JQ_QUERY}] has failed; stopping." >&2
+      return 1
+    fi
+
+    echo -e "$JQ"
+    return 0
+  fi
+
+  # Many people (like me) would prefer to see the latest issues on their "Activity Stream"
+  # If you are one of these people, please go complain on this JIRA issue opened in 2003 and still actively neglected
+  # as of January, 2016:
+  #
+  # https://jira.atlassian.com/browse/JRA-1973
+  #
+  if [[ $COMMAND == "me" ]] || [[ $COMMAND == "m" ]]; then
+    if [[ -z $ME_FILTER ]]; then
+      JQL="assignee = currentUser() AND status in (Open, \\\"To Do\\\", \\\"In Progress\\\", Reopened) ORDER BY updated DESC"
+    else
+      JQL="${ME_FILTER}"
+    fi
+
+    JQ_QUERY='.issues[]|"\(.key)\t\(.fields.summary)"'
+    CURL=$(curl --location --silent --request POST --header "Authorization: Basic ${JIRA_AUTH}" --header "Content-Type: application/json" ${JIRA_DOMAIN}/rest/api/2/search -d '{"jql":"'"${JQL}"'", "maxResults":15}')
 
     if [[ ! $? -eq 0 ]]; then
       echo "Curling [${JIRA_DOMAIN}/rest/api/2/search] has failed; stopping." >&2
