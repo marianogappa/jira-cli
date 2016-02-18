@@ -15,6 +15,22 @@ jira ok
 
 ## Use case examples
 
+- See last updated open issues assigned to me, ordered by last updated (JQL configurable)
+```
+$ jira me
+ABC-1234 Destroy Death Star
+ABC-4567 Escape from new half-built Death Star
+ABC-8901 Receive light saber and look distressed
+```
+- Open them on your browser
+```
+$ jira me | jira open
+```
+- Or the hacker version (provided you add alias j='jira')
+```
+$ j m | j o
+```
+
 - Search for issues about a billing bug
 ```
 $ jira search 'billing bug'
