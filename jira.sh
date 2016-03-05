@@ -196,7 +196,7 @@ function jira {
 
     JQ_QUERY='.issues[]|"\(.key)\t\(.fields.summary)"'
     TRIM=$(tr -d ' ' <<< $LINE)
-    CURL=$(curl --location --silent --request POST --header "Authorization: Basic ${JIRA_AUTH}" --header "Content-Type: application/json" ${JIRA_DOMAIN}/rest/api/2/search -d '{"jql":"'"${PROJECT_CLAUSE}"'text ~ \"'"${SEARCH}"'\"", "maxResults":15}')
+    CURL=$(curl --location --silent --request POST --header "Authorization: Basic ${JIRA_AUTH}" --header "Content-Type: application/json" ${JIRA_DOMAIN}/rest/api/2/search -d '{"jql":"'"${PROJECT_CLAUSE}"'text ~ \"'"${SEARCH}"'\" ORDER BY updated DESC", "maxResults":15}')
 
     if [[ ! $? -eq 0 ]]; then
       echo "Curling [${JIRA_DOMAIN}/rest/api/2/search] has failed; stopping." >&2
