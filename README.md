@@ -1,6 +1,9 @@
 # Jira CLI
 Lightweight bash script for easily querying your company's JIRA issues
 
+## Blogpost
+http://marianogappa.github.io/software/2016/05/10/jira-cli/
+
 ## Setup
 
 ```
