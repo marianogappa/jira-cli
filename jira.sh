@@ -152,7 +152,7 @@ function jira {
   if [[ $COMMAND == "ok" ]]; then
     CURL=$(curl --silent -LI --header "Authorization: Basic ${JIRA_AUTH}" --header "Content-Type: application/json" -XGET ${JIRA_DOMAIN}/rest/api/2/myself | head -n1 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
 
-    if [[ "$CURL" == "HTTP/1.1 200 OK" ]]; then
+    if [[ "$CURL" == "HTTP/1.1 200" ]]; then
       echo "OK"
       return 0
     else
